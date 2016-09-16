@@ -261,7 +261,6 @@ class Button(_Widget):
         surface.fill(fill_color, self.rect.inflate(-2,-2))
         surface.blit(text, self.text_rect)
 
-
 class CheckBoxArray(_Widget):
     """A class to hold an array of CheckBox instances."""
     def __init__(self, content, initial, start, space, key_bindings=None):
@@ -331,6 +330,23 @@ class CheckBoxArray(_Widget):
         for box in self.checkboxes:
             box.draw(surface)
 
+class ExclusiveCheckBoxArray(CheckBoxArray):
+    def get_event(self, event):
+        """Pass events down to each checkbox."""
+        for i in range(len(self.checkboxes)):
+            if self.checkboxes[i].checked:
+                selected = i
+
+        for box in self.checkboxes:
+            box.get_event(event)
+
+        if len([c.checked for c in self.checkboxes if c.checked]) > 1:
+            self.checkboxes[selected].checked = False
+        elif len([c.checked for c in self.checkboxes if c.checked]) == 0:
+            self.checkboxes[selected].checked = True
+
+        if event.type == pg.KEYDOWN and event.key in self.key_bindings:
+            self.key_bindings[event.key](self)
 
 class CheckBox(_Widget):
     """A simple checkbox class. Size and appearance are currently hardcoded."""
